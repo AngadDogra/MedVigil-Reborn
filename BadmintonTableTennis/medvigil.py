@@ -1,15 +1,15 @@
 from prefect import flow, task
-from mlx_lm import load, generate
 import os
+from gradio_client import Client
 
-MODEL_NAME = "cnfusion/HuatuoGPT-o1-8B-Q4-mlx"
 PROMPT_FILE = "prompt.txt"
 RESPONSE_FILE = "response.txt"
 
 @task
 def test_llm():
-    """Loads the medical model and generates a response based on user input."""
-    model, tokenizer = load(MODEL_NAME)
+    """Uses the Gradio client to generate a response based on user input."""
+    # Initialize the Gradio client
+    client = Client("buddiezweb/Medical")
 
     # Read user input from prompt.txt
     if os.path.exists(PROMPT_FILE):
@@ -23,22 +23,25 @@ def test_llm():
     if not prompt:
         return "❌ Prompt file is empty!"
 
-    # Format input for the model
-    if hasattr(tokenizer, "apply_chat_template") and tokenizer.chat_template is not None:
-        messages = [{"role": "user", "content": prompt}]
-        prompt = tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
+    # Call the Gradio API
+    try:
+        result = client.predict(
+            message=prompt,
+            system_message="You are advising medical information, give detailed cures and suggestions, if serious suggest to go to doctor.",
+            max_tokens=512,
+            temperature=0.7,
+            top_p=0.95,
+            api_name="/chat"
         )
-
-    # Run the model
-    response = generate(model, tokenizer, prompt=prompt, verbose=True)
+        response = result  # Assuming the result is the response text
+    except Exception as e:
+        response = f"❌ Error during API call: {str(e)}"
 
     # Save output
     with open(RESPONSE_FILE, "w") as file:
         file.write(response)
 
     print(f"📝 Model Response: {response}")  # Debugging output
-
 
 @flow(name="MedVigil Processing Flow")
 def main_flow():

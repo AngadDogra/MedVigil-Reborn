@@ -328,8 +328,8 @@ button:active {
   visibility: hidden;
   pointer-events: none;
 
-  /* margin: 40px auto;
-  padding: 35px 40px; */
+  margin: 40px auto;
+  padding: 35px 40px;
   width: 92%;
   max-width: 1000px;
   background: linear-gradient(to right, #ffe6e6, #fff0f5); /* soft pink-beige blend */

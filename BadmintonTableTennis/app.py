@@ -2,20 +2,29 @@ from fastapi import FastAPI, WebSocket, Request, File, UploadFile, HTTPException
 import os
 import subprocess
 import json
-import whisper
-from pydub import AudioSegment
-from pydub.exceptions import CouldntDecodeError
+# import whisper
+# from pydub import AudioSegment
+# from pydub.exceptions import CouldntDecodeError
 from fastapi.middleware.cors import CORSMiddleware
 from transformers import pipeline, AutoModelForSeq2SeqLM, AutoTokenizer
 from typing import Optional
 import torch
 from pydantic import BaseModel
 from deep_translator import GoogleTranslator
+from gradio_client import Client
+from fastapi import WebSocket, HTTPException
+
+import os 
+
+PROMPT_FILE = "prompt.txt"
+RESPONSE_FILE = "response.txt"
 
 app = FastAPI()
 
+client = Client("buddiezweb/Medical")
+
 # Load models at startup
-model = whisper.load_model("small")  # Your existing Whisper model
+# model = whisper.load_model("small")  # Your existing Whisper model
 summarization_model = None
 summarization_tokenizer = None
 
@@ -23,7 +32,7 @@ summarization_tokenizer = None
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=True, 
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -66,7 +75,7 @@ def generate_summary(text: str) -> dict:
         # Post-process: Split into numbered points
         sentences = full_summary.split('. ')
         numbered_points = [s.strip().rstrip('.') for s in sentences if s.strip()]
-        numbered_points = numbered_points[:3]  # Only top 3
+        numbered_points = numbered_points[:]  # Only top 3
 
         return {
             "summary": full_summary,
@@ -152,6 +161,7 @@ async def save_prompt(request: Request):
         print(f"❌ Error in save_prompt: {e}")
         return {"error": str(e)}
 
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket to send MedVigil output to frontend."""
@@ -159,21 +169,43 @@ async def websocket_endpoint(websocket: WebSocket):
     print("INFO: WebSocket connection open")
 
     try:
-        # Start MedVigil as a subprocess
-        process = subprocess.Popen(
-            ["python3", "run_medvigil.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        # Read user input from prompt.txt
+        if os.path.exists(PROMPT_FILE):
+            with open(PROMPT_FILE, "r") as file:
+                prompt = file.read().strip()
+        else:
+            await websocket.send_text("❌ No prompt file found!")
+            await websocket.close()
+            return
 
-        while True:
-            output = process.stdout.readline()
-            if output == "" and process.poll() is not None:
-                break  # Process finished
+        if not prompt:
+            await websocket.send_text("❌ Prompt file is empty!")
+            await websocket.close()
+            return
 
-            if output:
-                await websocket.send_text(output.strip())  # Send output to frontend
+        # Initialize the Gradio client
+        client = Client("buddiezweb/Medical")
+
+        # Call the Gradio API
+        try:
+            result = client.predict(
+                message=prompt,
+                system_message="You are advising medical information, give detailed cures and suggestions, if serious suggest to go to doctor.",
+                max_tokens=512,
+                temperature=0.7,
+                top_p=0.95,
+                api_name="/chat"
+            )
+            response = result  # Assuming the result is the response text
+        except Exception as e:
+            response = f"❌ Error during API call: {str(e)}"
+
+        # Send the response over WebSocket
+        await websocket.send_text(response)
+
+        # Save output to file
+        with open(RESPONSE_FILE, "w") as file:
+            file.write(response)
 
         await websocket.send_text("✅ Process completed!")
         await websocket.close()
@@ -181,7 +213,8 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"❌ Error: {e}")
         await websocket.send_text(f"❌ Error: {str(e)}")
-
+        await websocket.close()
+        
 def transcribe_audio(file_path: str) -> str:
     """Transcribes speech from an audio file using Whisper."""
     try:
