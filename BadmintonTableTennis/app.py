@@ -36,55 +36,85 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 @app.on_event("startup")
 async def load_models():
     """Load summarization model at startup"""
     global summarization_model, summarization_tokenizer
     try:
         print("Loading summarization model...")
-        model_name = "sshleifer/distilbart-cnn-12-6"
+        # Using BART large fine-tuned on CNN/DailyMail - better for summarization
+        model_name = "facebook/bart-large-cnn"
         summarization_tokenizer = AutoTokenizer.from_pretrained(model_name)
         summarization_model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
         print("✅ Summarization model loaded successfully")
     except Exception as e:
         print(f"❌ Failed to load summarization model: {e}")
 
-def generate_summary(text: str) -> dict:
-    """Generate a 3-point numbered summary using distilBART model"""
+def generate_summary(text: str, num_points: int = 5) -> dict:
+    """Generate a numbered summary with variable points using BART model
+    
+    Args:
+        text: The text to summarize
+        num_points: Number of key points to extract (default: 5)
+    """
     try:
         if not summarization_model or not summarization_tokenizer:
             raise ValueError("Model or tokenizer not loaded.")
 
-        # Add prompt
-        prompt = "Summarize the following into three numbered points:\n" + text.strip()
+        # Add prompt with variable number of points
+        prompt = f"Summarize the following into {num_points} numbered points:\n" + text.strip()
 
-        # Tokenize input
+        # Tokenize input with longer max_length for more context
         inputs = summarization_tokenizer(prompt, return_tensors="pt", truncation=True, max_length=1024)
 
-        # Generate output
+        # Generate output with improved parameters
         outputs = summarization_model.generate(
             **inputs,
-            max_new_tokens=150,
-            num_beams=4,
+            max_new_tokens=250,  # Increased length for better summaries
+            num_beams=5,         # More beams for better search
+            length_penalty=1.0,  # Encourage slightly longer summaries
+            no_repeat_ngram_size=2,  # Reduce repetition
             early_stopping=True
         )
 
         full_summary = summarization_tokenizer.decode(outputs[0], skip_special_tokens=True)
 
         # Post-process: Split into numbered points
-        sentences = full_summary.split('. ')
-        numbered_points = [s.strip().rstrip('.') for s in sentences if s.strip()]
-        numbered_points = numbered_points[:]  # Only top 3
+        # More robust pattern matching for numbered points
+        import re
+        points = []
+        
+        # First try to find explicitly numbered points
+        numbered_pattern = re.compile(r'(?:\d+\.\s*)(.*?)(?=(?:\d+\.|$))', re.DOTALL)
+        matches = numbered_pattern.findall(full_summary)
+        
+        if matches and len(matches) >= num_points // 2:  # If we found enough numbered points
+            points = [point.strip() for point in matches]
+        else:
+            # Fall back to sentence splitting if numbered pattern not found
+            sentences = re.split(r'(?<=[.!?])\s+', full_summary)
+            points = [s.strip() for s in sentences if s.strip()]
+        
+        # Ensure we don't return more points than requested
+        points = points[:num_points]
+        
+        # Format points with numbers if they're not already numbered
+        numbered_points = []
+        for i, point in enumerate(points, 1):
+            if re.match(r'^\d+\.', point):  # Already has a number
+                numbered_points.append(point)
+            else:
+                numbered_points.append(f"{i}. {point}")
 
         return {
             "summary": full_summary,
-            "points": numbered_points
+            "points": numbered_points,
+            "num_points": len(numbered_points)
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 @app.post("/summarize")
 async def summarize(request: Request):
     """Summarization endpoint"""
