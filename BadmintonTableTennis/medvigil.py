@@ -31,7 +31,7 @@ def test_llm():
         )
 
     # Run the model
-    response = generate(model, tokenizer, prompt=prompt, verbose=True)
+    response = generate(model, tokenizer, prompt=prompt, verbose=True, max_tokens=1024)
 
     # Save output
     with open(RESPONSE_FILE, "w") as file:

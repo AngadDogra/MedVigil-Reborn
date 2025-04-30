@@ -34,7 +34,7 @@ async def load_models():
     global summarization_model, summarization_tokenizer
     try:
         print("Loading summarization model...")
-        model_name = "sshleifer/distilbart-cnn-12-6"
+        model_name = "facebook/bart-large-cnn"
         summarization_tokenizer = AutoTokenizer.from_pretrained(model_name)
         summarization_model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
         print("✅ Summarization model loaded successfully")
@@ -66,7 +66,7 @@ def generate_summary(text: str) -> dict:
         # Post-process: Split into numbered points
         sentences = full_summary.split('. ')
         numbered_points = [s.strip().rstrip('.') for s in sentences if s.strip()]
-        numbered_points = numbered_points[:3]  # Only top 3
+        numbered_points = numbered_points[:]  # Only top 3
 
         return {
             "summary": full_summary,

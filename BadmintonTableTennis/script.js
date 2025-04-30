@@ -1,5 +1,8 @@
-var animationWords = ['Tell us what ails you.', 'AI in Medicine.', 'We will fix you.', ':)'];
+var animationWords = ['Tell us what ails you.', 'AI in Medicine.'];
 var animationInterval;
+
+
+
 
 function switchToImages() {
   // 1. Fade out animated text
@@ -353,113 +356,113 @@ async function summarizeText() {
 }
 
 
-// Doctor Mapping
-const doctorMapping = {
-  "heart": "Dr. Akhilesh Pandey",
-  "brain": "Dr. Chandan Kumar",
-  "cancer": "Dr. Happy Dog (Oncologist)",
-  "fever": "Dr. Mehul Aggarwal (General Physician)",
-  "surgery": "Dr. Raj Sharma (Surgeon)",
-  "pet": "Dr. Preeti Verma (Veterinary Specialist)",
-};
+// // Doctor Mapping
+// const doctorMapping = {
+//   "heart": "Dr. Akhilesh Pandey",
+//   "brain": "Dr. Chandan Kumar",
+//   "cancer": "Dr. Happy Dog (Oncologist)",
+//   "fever": "Dr. Mehul Aggarwal (General Physician)",
+//   "surgery": "Dr. Raj Sharma (Surgeon)",
+//   "pet": "Dr. Preeti Verma (Veterinary Specialist)",
+// };
 
-// Suggestion Function
-function suggestDoctorFromQuery() {
-  const queryText = document.getElementById("userPrompt").value.toLowerCase();
-  const outputDiv = document.getElementById("output");
+// // Suggestion Function
+// function suggestDoctorFromQuery() {
+//   const queryText = document.getElementById("userPrompt").value.toLowerCase();
+//   const outputDiv = document.getElementById("output");
 
 
-  let suggestedDoctor = null;
-  for (const keyword in doctorMapping) {
-      if (queryText.includes(keyword)) {
-          suggestedDoctor = doctorMapping[keyword];
-          break;
-      }
-  }
+//   let suggestedDoctor = null;
+//   for (const keyword in doctorMapping) {
+//       if (queryText.includes(keyword)) {
+//           suggestedDoctor = doctorMapping[keyword];
+//           break;
+//       }
+//   }
 
-  if (suggestedDoctor) {
-      showDoctorSplash(suggestedDoctor);
-  } else {
-      outputDiv.innerHTML += "<p style='color: gray;'>❓ Couldn't determine a specialist. Please try again with more specific symptoms.</p>";
-  }
-}
+//   if (suggestedDoctor) {
+//       showDoctorSplash(suggestedDoctor);
+//   } else {
+//       outputDiv.innerHTML += "<p style='color: gray;'>❓ Couldn't determine a specialist. Please try again with more specific symptoms.</p>";
+//   }
+// }
 
-//scrolling function
-function scrollToSummarySection() {
-  const summarySection = document.getElementById("summary-section");
-  if (summarySection) {
-    summarySection.scrollIntoView({ behavior: "smooth" });
-  }
-}
+// //scrolling function
+// function scrollToSummarySection() {
+//   const summarySection = document.getElementById("summary-section");
+//   if (summarySection) {
+//     summarySection.scrollIntoView({ behavior: "smooth" });
+//   }
+// }
 
-// Doctor splash page function
+// // Doctor splash page function
 
-function showDoctorSplash(doctorName) {
-  let splash = document.getElementById("splash");
+// function showDoctorSplash(doctorName) {
+//   let splash = document.getElementById("splash");
 
-  // If splash doesn't exist, create it
-  if (!splash) {
-    splash = document.createElement("div");
-    splash.id = "splash";
-    document.body.appendChild(splash);
-  }
+//   // If splash doesn't exist, create it
+//   if (!splash) {
+//     splash = document.createElement("div");
+//     splash.id = "splash";
+//     document.body.appendChild(splash);
+//   }
 
-  // Forcefully apply styles even if splash existed
-  splash.style.position = "fixed";
-  splash.style.top = "0";
-  splash.style.left = "0";
-  splash.style.width = "100vw";
-  splash.style.height = "100vh";
-  splash.style.background = "#000"; // Full black background
-  splash.style.color = "white";
-  splash.style.display = "flex";
-  splash.style.flexDirection = "column";
-  splash.style.justifyContent = "center";
-  splash.style.alignItems = "center";
-  splash.style.textAlign = "center";
-  splash.style.zIndex = "99999";
-  splash.style.opacity = "0";
-  splash.style.transition = "opacity 0.6s ease";
-  splash.style.fontFamily = "'Segoe UI', sans-serif";
-  splash.style.fontSize = "32px";
+//   // Forcefully apply styles even if splash existed
+//   splash.style.position = "fixed";
+//   splash.style.top = "0";
+//   splash.style.left = "0";
+//   splash.style.width = "100vw";
+//   splash.style.height = "100vh";
+//   splash.style.background = "#000"; // Full black background
+//   splash.style.color = "white";
+//   splash.style.display = "flex";
+//   splash.style.flexDirection = "column";
+//   splash.style.justifyContent = "center";
+//   splash.style.alignItems = "center";
+//   splash.style.textAlign = "center";
+//   splash.style.zIndex = "99999";
+//   splash.style.opacity = "0";
+//   splash.style.transition = "opacity 0.6s ease";
+//   splash.style.fontFamily = "'Segoe UI', sans-serif";
+//   splash.style.fontSize = "32px";
 
-  // Clear previous content
-  splash.innerHTML = "";
+//   // Clear previous content
+//   splash.innerHTML = "";
 
-  // Create title
-  const title = document.createElement("div");
-  title.textContent = "🩺 Your doctor suggestion is:";
-  title.style.marginBottom = "20px";
+//   // Create title
+//   const title = document.createElement("div");
+//   title.textContent = "🩺 Your doctor suggestion is:";
+//   title.style.marginBottom = "20px";
 
-  // Doctor name
-  const doctorElem = document.createElement("div");
-  doctorElem.id = "doctorName";
-  doctorElem.style.fontSize = "48px";
-  doctorElem.style.color = "white";
-  doctorElem.style.marginBottom = "5px";
-  doctorElem.textContent = doctorName;
+//   // Doctor name
+//   const doctorElem = document.createElement("div");
+//   doctorElem.id = "doctorName";
+//   doctorElem.style.fontSize = "48px";
+//   doctorElem.style.color = "white";
+//   doctorElem.style.marginBottom = "5px";
+//   doctorElem.textContent = doctorName;
 
-  // Timing info
-  const timingElem = document.createElement("div");
-  timingElem.textContent = "🕒 Visit them between 10:00 AM - 4:00 PM";
-  timingElem.style.fontSize = "24px";
-  timingElem.style.color = "#ccc";
+//   // Timing info
+//   const timingElem = document.createElement("div");
+//   timingElem.textContent = "🕒 Visit them between 10:00 AM - 4:00 PM";
+//   timingElem.style.fontSize = "24px";
+//   timingElem.style.color = "#ccc";
 
-  // Append all
-  splash.appendChild(title);
-  splash.appendChild(doctorElem);
-  splash.appendChild(timingElem);
+//   // Append all
+//   splash.appendChild(title);
+//   splash.appendChild(doctorElem);
+//   splash.appendChild(timingElem);
 
-  // Show splash
-  splash.classList.add("show");
-  splash.style.opacity = "1";
+//   // Show splash
+//   splash.classList.add("show");
+//   splash.style.opacity = "1";
 
-  // Hide after 5 seconds
-  setTimeout(() => {
-    splash.style.opacity = "0";
-    splash.classList.remove("show");
-  }, 5000);
-}
+//   // Hide after 5 seconds
+//   setTimeout(() => {
+//     splash.style.opacity = "0";
+//     splash.classList.remove("show");
+//   }, 5000);
+// }
 
 function printForm(divName) {
   const contentToPrint = document.getElementById(divName).innerHTML;
