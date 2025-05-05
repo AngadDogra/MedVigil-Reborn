@@ -1,6 +1,6 @@
 # Charaka AI - Medical Assistant
 
-![Charaka AI Logo](images/charaka-logo.png)
+![Charaka AI Logo](BadmintonTableTennis/last.png)
 
 ## Overview
 
