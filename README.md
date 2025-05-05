@@ -2,9 +2,6 @@
 
 ![Charaka AI Logo](BadmintonTableTennis/last.png)
 
-## Overview
-
-Charaka AI is an advanced medical assistant that combines fine-tuned medical language models with multimodal inputs for comprehensive healthcare support. Named after the ancient physician Charaka, this system processes video, audio, and text to provide informed medical assistance.
 
 ## Features
 
