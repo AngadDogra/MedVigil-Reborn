@@ -14,7 +14,7 @@ Charaka AI is an advanced medical assistant that combines fine-tuned medical lan
 - **Diagnostic Assistance**: Offers evidence-based suggestions and medical information
 - **Multilingual Support**: Handles consultations in multiple languages
 
-![Dashboard Screenshot](images/dashboard-screenshot.png)
+![Dashboard Screenshot](BadmintonTableTennis/workflow-Photoroom.png)
 
 ## Technical Architecture
 
