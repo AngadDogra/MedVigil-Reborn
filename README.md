@@ -1,7 +1,7 @@
 # Charaka AI - Medical Assistant
 
 ![Charaka AI Logo](BadmintonTableTennis/last.png)
-
+![Show](BadmintonTableTennis/show.png)
 
 ## Features
 
